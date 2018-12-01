@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+import pandas as pd
 import requests
 import logging
 import os
@@ -13,8 +14,6 @@ import io
 import abc
 import tempfile
 import csv
-
-from rafiki.constants import DatasetType
 
 logger = logging.getLogger(__name__)
 
@@ -170,10 +169,40 @@ class ImageFilesDataset(ModelDataset):
 
         return (num_samples, num_classes, image_paths, image_classes, dataset_dir)
 
+class TableDataset(ModelDataset):
+    def __init__(self, dataset_path):
+        super().__init__(dataset_path)
+        self._table = self._load(self.path)
+        self._preprocess()
+
+    def _load(self, dataset_path):
+        # Create temp directory to unzip to
+        dataset_dir = tempfile.TemporaryDirectory()
+
+        dataset_zipfile = zipfile.ZipFile(dataset_path, 'r')
+        dataset_zipfile.extractall(path=dataset_dir.name)
+        dataset_zipfile.close()
+
+        # Read table.csv
+        table_csv_path = os.path.join(dataset_dir.name, 'table.csv')
+        table = pd.read_csv(table_csv_path)
+
+        return table
+
+    def get_x(self):
+        return self._x
+
+    def get_y(self):
+        return self._y
+
+    def _preprocess(self):
+        self._x = self._table.iloc[:, table.shape[1]-1]
+        self._y = pd.get_dummies(self._table.iloc[:, 0:table.shape[1]-1])
+
 class ModelDatasetUtils():
     '''
     Collection of utility methods to help with the loading of datasets
-    '''   
+    '''
     def __init__(self):
         # Caches downloaded datasets
         self._dataset_uri_to_path = {}
@@ -199,6 +228,14 @@ class ModelDatasetUtils():
         dataset_path = self.download_dataset_from_uri(dataset_uri)
         return ImageFilesDataset(dataset_path, image_size)
 
+    def load_dataset_of_table(self, dataset_uri):
+        '''
+            :param dataset_uri:
+            :return:
+        '''
+        dataset_path = self.download_dataset_from_uri(dataset_uri)
+        return TableDataset(dataset_path)
+
     def resize_as_images(self, images, image_size):
         '''
             Resize a list of N grayscale images to another size.
@@ -210,7 +247,7 @@ class ModelDatasetUtils():
         images = [Image.fromarray(np.asarray(x, dtype=np.uint8)) for x in images]
         images = [np.asarray(x.resize(image_size)) for x in images]
         return np.asarray(images)
-                
+
     def download_dataset_from_uri(self, dataset_uri):
         '''
             Maybe download the dataset at URI, ensuring that the dataset ends up in the local filesystem.
@@ -254,3 +291,8 @@ class ModelDatasetUtils():
         return dataset_path
 
 
+if __name__ == '__main__':
+    utils = ModelDatasetUtils()
+    dataset = utils.load_dataset_of_table('https://raw.githubusercontent.com/Yirui-Wang/rafiki-datasets/master/table_regression/home_rentals_test.zip')
+    table = dataset.get_table()
+    print(table)
