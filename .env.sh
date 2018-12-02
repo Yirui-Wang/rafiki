@@ -26,7 +26,7 @@ export LOCAL_WORKDIR_PATH=$PWD
 export DOCKER_WORKDIR_PATH=/root/rafiki
 
 # Docker images for Rafiki's custom components
-export RAFIKI_IMAGE_ADMIN=rafikiai/rafiki_admin
+export RAFIKI_IMAGE_ADMIN=wangyirui/rafiki_admin
 export RAFIKI_IMAGE_ADMIN_WEB=rafikiai/rafiki_admin_web
 export RAFIKI_IMAGE_ADVISOR=rafikiai/rafiki_advisor
 export RAFIKI_IMAGE_WORKER=rafikiai/rafiki_worker
