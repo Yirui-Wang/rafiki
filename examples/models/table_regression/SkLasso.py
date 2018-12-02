@@ -3,9 +3,8 @@ import pickle
 
 from sklearn.linear_model import Lasso
 
-from rafiki.constants import ModelDependency, TaskType
-from rafiki.model import BaseModel, InvalidModelParamsException, \
-    test_model_class
+from rafiki.constants import TaskType
+from rafiki.model import BaseModel, InvalidModelParamsException, test_model_class
 
 
 class SkLasso(BaseModel):
@@ -24,21 +23,20 @@ class SkLasso(BaseModel):
         self._reg = Lasso(self._alpha)
 
     def train(self, dataset_uri):
-        table = self.utils.load_dataset_of_table(dataset_uri).get_table()
-        x = table.iloc[:, 0:table.shape[1] - 1]
-        y = table.iloc[:, table.shape[1] - 1]
+        dataset = self.utils.load_dataset_of_table(dataset_uri)
+        x = dataset.get_x()
+        y = dataset.get_y()
         self._reg.fit(x, y)
 
     def evaluate(self, dataset_uri):
         """
-        In the train() and evaluate(), dataset has been loaded for more than
-        once. This can be optimized in the future?
+        In the train() and evaluate(), dataset has been loaded for more than once. This can be optimized in the future?
         :param dataset_uri:
         :return:
         """
-        table = self.utils.load_dataset_of_table(dataset_uri).get_table()
-        x = table.iloc[:, 0:table.shape[1]-1]
-        y = table.iloc[:, table.shape[1]-1]
+        dataset = self.utils.load_dataset_of_table(dataset_uri)
+        x = dataset.get_x()
+        y = dataset.get_y()
         return self._reg.score(x, y)
 
     def predict(self, queries):
@@ -64,17 +62,25 @@ class SkLasso(BaseModel):
 
 
 if __name__ == '__main__':
+    # model = SkLasso()
+    # model._reg = Lasso(0.1)
+    # model.train('data/home_rentals_train.zip')
+    # print(model.evaluate('data/home_rentals_test.zip'))
+    # queries = [[3358, 2, 1, 743, 10, 3230, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    #            [3359, 1, 1, 533, 10, 1903, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #            [3360, 3, 2, 1186, 62, 4437, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+    #            ]
+    # print(model.predict(queries))
     test_model_class(
         model_file_path=__file__,
         model_class='SkLasso',
         task=TaskType.TABLE_REGRESSION,
-        dependencies={
-        },
+        dependencies={},
         train_dataset_uri='data/home_rentals_train.zip',
         test_dataset_uri='data/home_rentals_test.zip',
         queries=[
-            [2, 1, 605, 'good', 10, 3120, 'west_welmwood', 3120],
-            [2, 1, 517, 'poor', 17, 2916, 'northwest', 2916],
-            [1, 1, 515, 'great', 0, 2558, 'east_elmwood', 2558]
+            [3358, 2, 1, 743, 10, 3230, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [3359, 1, 1, 533, 10, 1903, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [3360, 3, 2, 1186, 62, 4437, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
         ]
     )
