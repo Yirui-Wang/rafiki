@@ -10,7 +10,7 @@ title()
 
 build_image()
 {
-    docker build -t $1:$RAFIKI_VERSION -f $2 --build-arg DOCKER_WORKDIR_PATH=$DOCKER_WORKDIR_PATH $PWD || exit 1 
+    docker build -t "$1":$RAFIKI_VERSION -f $2 --build-arg DOCKER_WORKDIR_PATH=$DOCKER_WORKDIR_PATH $PWD || exit 1 
 }
 
 # Build Rafiki's images
