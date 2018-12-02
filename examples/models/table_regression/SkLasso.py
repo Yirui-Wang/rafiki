@@ -13,7 +13,7 @@ class SkLasso(BaseModel):
             'knobs': {
                 'alpha': {
                     'type': 'float_exp',
-                    'range': [1e-3, 1e5]
+                    'range': [1e-3, 1e1]
                 }
             }
         }
