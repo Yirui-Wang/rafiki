@@ -196,8 +196,8 @@ class TableDataset(ModelDataset):
         return self._y
 
     def _preprocess(self):
-        self._x = self._table.iloc[:, table.shape[1]-1]
-        self._y = pd.get_dummies(self._table.iloc[:, 0:table.shape[1]-1])
+        self._x = self._table.iloc[:, 0:self._table.shape[1]-1]
+        self._y = self._table.iloc[:, self._table.shape[1]-1]
 
 class ModelDatasetUtils():
     '''
